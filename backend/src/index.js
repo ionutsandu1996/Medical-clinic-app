@@ -13,6 +13,8 @@ const express = require('express');
  // Load env variables from .env (Port, DB_URL, etc)
  require('dotenv').config();
 
+ const pool = require('./config/db');
+
  // Create app instance
  const app = express();
 
