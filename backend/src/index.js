@@ -34,6 +34,8 @@ const express = require('express');
  // Activate morgan - logs HTTP requests to the console
  app.use(morgan('dev'));
 
+ app.use(express.json());
+
  // Allow reading the data sent from HTML forms
  app.use(express.urlencoded({ extended: true }));
 
@@ -55,7 +57,7 @@ app.get('/health', (req,res) => {
 });
 
 // API Routes 
-//app.use('/api/doctors', require('./routes/doctors'));
+app.use('/api/doctors', require('./routes/doctors'));
 //app.use('/api/patients', require('./routes/patients'));
 //app.use('/api/appointments', require('./routes/appointments'));
 //app.use('/api/medical-records', require('./routes/medicalRecords'));
