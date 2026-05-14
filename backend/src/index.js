@@ -59,7 +59,7 @@ app.get('/health', (req,res) => {
 // API Routes 
 app.use('/api/doctors', require('./routes/doctors'));
 app.use('/api/patients', require('./routes/patients'));
-//app.use('/api/appointments', require('./routes/appointments'));
+app.use('/api/appointments', require('./routes/appointments'));
 //app.use('/api/medical-records', require('./routes/medicalRecords'));
 
 // ===============
