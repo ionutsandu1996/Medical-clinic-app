@@ -1,4 +1,4 @@
-markdown# 🏥 Medical Clinic Management System
+🏥 Medical Clinic Management System
 
 A full-stack web application for managing medical clinic appointments, built as a portfolio project to demonstrate modern software engineering and DevOps practices.
 
