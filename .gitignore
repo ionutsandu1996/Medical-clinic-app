@@ -1,0 +1,87 @@
+# ========================
+# Dependencies
+# ========================
+node_modules/
+.pnp
+.pnp.js
+
+# ========================
+# Environment Variables
+# ========================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+
+# ========================
+# Build outputs
+# ========================
+dist/
+build/
+.next/
+out/
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========================
+# Docker
+# ========================
+.docker/
+
+# ========================
+# Database
+# ========================
+*.sql.bak
+pgdata/
+
+# ========================
+# IDE & Editors
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ========================
+# Testing
+# ========================
+coverage/
+.nyc_output/
+
+# ========================
+# Firebase
+# ========================
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# ========================
+# Kubernetes & Helm
+# ========================
+*.kubeconfig
+helm/*/charts/
+helm/*/Chart.lock
+
+# ========================
+# Jenkins
+# ========================
+.jenkins/
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
