@@ -10,25 +10,27 @@ const getPatientRecords = async (req, res) => {
     const { patientId } = req.params;
 
     const result = await pool.query(`
-      SELECT
-        mr.id,
-        mr.diagnosis,
-        mr.treatment,
-        mr.prescription,
-        mr.notes,
-        mr.created_at,
-        a.appointment_date,
-        a.appointment_time,
-        d.first_name AS doctor_first_name,
-        d.last_name AS doctor_last_name,
-        s.name AS specialization
-      FROM medical_records mr
-      JOIN appointments a ON a.id = mr.appointment_id
-      JOIN doctors d ON d.id = mr.doctor_id
-      LEFT JOIN specializations s ON s.id = d.specialization_id
-      WHERE mr.patient_id = $1
-      ORDER BY mr.created_at DESC
-    `, [patientId]);
+  SELECT
+    mr.id,
+    mr.appointment_id,
+    mr.doctor_id,
+    mr.diagnosis,
+    mr.treatment,
+    mr.prescription,
+    mr.notes,
+    mr.created_at,
+    a.appointment_date,
+    a.appointment_time,
+    d.first_name AS doctor_first_name,
+    d.last_name AS doctor_last_name,
+    s.name AS specialization
+  FROM medical_records mr
+  JOIN appointments a ON a.id = mr.appointment_id
+  JOIN doctors d ON d.id = mr.doctor_id
+  LEFT JOIN specializations s ON s.id = d.specialization_id
+  WHERE mr.patient_id = $1
+  ORDER BY mr.created_at DESC
+`, [patientId]);
 
     res.status(200).json({
       success: true,

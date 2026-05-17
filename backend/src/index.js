@@ -29,7 +29,11 @@ const express = require('express');
  app.use(helmet());
 
  // Activate cors - allows cross-origin requests (React + Express)
- app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
  // Activate morgan - logs HTTP requests to the console
  app.use(morgan('dev'));
