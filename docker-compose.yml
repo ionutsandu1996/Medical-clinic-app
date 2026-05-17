@@ -1,0 +1,128 @@
+# Versiunea docker-compose
+version: '3.8'
+
+services:
+
+  # ========================
+  # PostgreSQL Database
+  # ========================
+  postgres:
+    # Imaginea oficiala PostgreSQL 15
+    image: postgres:15
+    
+    # Numele containerului
+    container_name: clinic-postgres
+    
+    # Reporneste automat daca crapa
+    restart: unless-stopped
+    
+    # Variabile de mediu pentru configurare
+    environment:
+      POSTGRES_DB: clinic_db
+      POSTGRES_USER: clinic_user
+      POSTGRES_PASSWORD: clinic_pass
+    
+    # Portul expus pe host
+    ports:
+      - "5432:5432"
+    
+    # Volum persistent - datele nu se pierd la restart
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Rulam schema SQL la prima pornire
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    
+    # Healthcheck - verifica daca PostgreSQL e gata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinic_user -d clinic_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    # Reteaua interna
+    networks:
+      - clinic-network
+
+  # ========================
+  # Backend Node.js
+  # ========================
+  backend:
+    # Builduim imaginea din Dockerfile-ul local
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    
+    # Numele containerului
+    container_name: clinic-backend
+    
+    restart: unless-stopped
+    
+    # Portul expus pe host
+    ports:
+      - "4000:4000"
+    
+    # Variabile de mediu
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: clinic_db
+      DB_USER: clinic_user
+      DB_PASSWORD: clinic_pass
+    
+    # Asteapta ca PostgreSQL sa fie healthy inainte sa porneasca
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    # Volum pentru hot-reload in development
+    volumes:
+      - ./backend/src:/app/src
+    
+    # Reteaua interna
+    networks:
+      - clinic-network
+
+  # ========================
+  # Frontend React + Nginx
+  # ========================
+  frontend:
+    # Builduim imaginea din Dockerfile-ul local
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    
+    # Numele containerului
+    container_name: clinic-frontend
+    
+    restart: unless-stopped
+    
+    # Portul expus pe host
+    ports:
+      - "80:80"
+    
+    # Asteapta ca backend-ul sa porneasca
+    depends_on:
+      - backend
+    
+    # Reteaua interna
+    networks:
+      - clinic-network
+
+# ========================
+# Volume persistente
+# ========================
+volumes:
+  # Datele PostgreSQL persista intre restart-uri
+  postgres_data:
+
+# ========================
+# Retea interna
+# ========================
+networks:
+  clinic-network:
+    # Bridge network - serviciile comunica intre ele prin nume
+    # backend poate accesa postgres cu hostname "postgres"
+    # frontend poate accesa backend cu hostname "backend"
+    driver: bridge
