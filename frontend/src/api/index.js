@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Cream o instanta axios cu URL-ul de baza al backend-ului
 const api = axios.create({
-  baseURL: 'http://localhost:4000/api',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json'
   }
