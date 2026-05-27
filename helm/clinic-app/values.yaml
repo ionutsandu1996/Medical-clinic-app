@@ -27,7 +27,7 @@ config:
   data:
     NODE_ENV: "production"
     PORT: "3001"
-    DB_HOST: "clinic-postgresql"
+    DB_HOST: "clinic-app-postgresql"
     DB_PORT: "5432"
     DB_NAME: "clinic_db"
     DB_USER: "clinic_user"
@@ -41,6 +41,8 @@ secret:
 
 postgresql:
   enabled: true
+  image:
+    tag: latest
   auth:
     database: "clinic_db"
     username: "clinic_user"
