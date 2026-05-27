@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: clinic-backend
+  namespace: clinic
+spec:
+  selector:
+    app: clinic-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ .Values.ports.backend }}

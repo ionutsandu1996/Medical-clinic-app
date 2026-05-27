@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-backend
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: clinic-backend
+  template:
+    metadata:
+      labels:
+        app: clinic-backend
+    spec:
+      containers:
+        - name: clinic-backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.ports.backend }}
+          envFrom:
+            - configMapRef:
+                name: clinic-config
+            - secretRef:
+                name: clinic-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.ports.backend }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.ports.backend }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
