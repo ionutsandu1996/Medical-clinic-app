@@ -34,10 +34,12 @@ config:
     DB_POOL_MIN: "2"
     DB_POOL_MAX: "10"
     CORS_ORIGIN: "http://clinic.local"
+    JWT_SECRET_KEY: "jwt_secret"
 
 secret:
   DB_PASSWORD: "changeit"
   POSTGRES_PASSWORD: "changeit"
+  JWT_SECRET: "7bf0988538ef6be4ef4160fa4cad0119fc102a04e46bf90583ab7686f774ed50"
 
 postgresql:
   enabled: true

@@ -44,6 +44,8 @@ app.use(cors({
  app.use(express.urlencoded({ extended: true }));
 
 
+
+
  // ===============
 // Routes
 // ===============
@@ -66,6 +68,7 @@ app.use('/api/patients', require('./routes/patients'));
 app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/medical-records', require('./routes/medicalRecords'));
 app.use('/api/specializations', require('./routes/specializations'));
+app.use('/api/auth', require('./routes/auth'));
 
 // ===============
 // Error handler
