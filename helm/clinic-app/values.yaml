@@ -4,7 +4,7 @@ namespace: clinic
 backend:
   image:
     repository: ghcr.io/ionutsandu1996/medical-clinic-app/clinic-backend
-    tag: "latest"
+    tag: "1.0.1"
     pullPolicy: Always
   replicaCount: 1
 
