@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.config.name }}
-  namespace: {{ .Values.config.namespace }}
+  name: clinic-config
+  namespace: clinic
 data:
-  {{-toYaml .Values.config.data | indent 2 }}
+  {{- toYaml .Values.config.data | nindent 2 }}

@@ -1,5 +1,6 @@
 name: clinic-app
 namespace: clinic
+
 backend:
   image:
     repository: ghcr.io/ionutsandu1996/medical-clinic-app/clinic-backend
@@ -15,33 +16,24 @@ frontend:
   replicaCount: 1
 
 ports:
-    backend: 3001
-    frontend: 80
-
-postgresql:
-  image: postgres:15-alpine
-  replicaCount: 1
-  database: clinic_db
-  username: clinic_user
-  port: 5432
+  backend: 3001
+  frontend: 80
 
 ingress:
   enabled: true
   host: clinic.local
 
-
 config:
-  namespace: default
   data:
     NODE_ENV: "production"
     PORT: "3001"
     DB_HOST: "clinic-postgresql"
     DB_PORT: "5432"
-    DB_NAME: {{ .Values.postgresql.database | quote }}
-    DB_USER: {{ .Values.postgresql.username | quote }}
+    DB_NAME: "clinic_db"
+    DB_USER: "clinic_user"
     DB_POOL_MIN: "2"
     DB_POOL_MAX: "10"
-    CORS_ORIGIN: "http://{{ .Values.ingress.host }}"
+    CORS_ORIGIN: "http://clinic.local"
 
 secret:
   DB_PASSWORD: "changeit"
@@ -50,10 +42,10 @@ secret:
 postgresql:
   enabled: true
   auth:
-    database: clinic_db
-    username: clinic_user
-    password: "schimba_parola_asta"
-    postgresPassword: "schimba_parola_asta"
+    database: "clinic_db"
+    username: "clinic_user"
+    password: "changeit"
+    postgresPassword: "changeit"
   primary:
     persistence:
       enabled: true
