@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.name }}-backend
+  name: clinic-backend
   namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.backend.replicaCount }}
@@ -23,7 +23,7 @@ spec:
             - configMapRef:
                 name: clinic-config
             - secretRef:
-                name: clinic-secret
+                name: {{ .Values.name }}-secret
           readinessProbe:
             httpGet:
               path: /health
