@@ -78,7 +78,7 @@ jobs:
         run: |
           gh variable set FRONTEND_VERSION --body "${{ steps.version.outputs.next }}"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
       - name: Print image details
         run: |
