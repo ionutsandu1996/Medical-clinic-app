@@ -11,7 +11,7 @@ backend:
 frontend:
   image:
     repository: ghcr.io/ionutsandu1996/medical-clinic-app/clinic-frontend
-    tag: "v1.0.7"
+    tag: "v1.0.8"
     pullPolicy: Always
   replicaCount: 1
 
