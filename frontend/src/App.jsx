@@ -7,6 +7,7 @@ import Appointments from './pages/Appointments';
 import MedicalRecords from './pages/MedicalRecords';
 import Users from './pages/Users';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -32,6 +33,7 @@ function AppRoutes() {
             <Route path="/appointments" element={<PrivateRoute><Appointments /></PrivateRoute>} />
             <Route path="/medical-records" element={<PrivateRoute><MedicalRecords /></PrivateRoute>} />
             <Route path="/users" element={<PrivateRoute><Users /></PrivateRoute>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
         </main>
       </div>
