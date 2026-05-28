@@ -4,14 +4,14 @@ namespace: clinic
 backend:
   image:
     repository: ghcr.io/ionutsandu1996/medical-clinic-app/clinic-backend
-    tag: "v1.0.5"
+    tag: "v1.0.6"
     pullPolicy: Always
   replicaCount: 1
 
 frontend:
   image:
     repository: ghcr.io/ionutsandu1996/medical-clinic-app/clinic-frontend
-    tag: "v1.0.5"
+    tag: "v1.0.6"
     pullPolicy: Always
   replicaCount: 1
 
