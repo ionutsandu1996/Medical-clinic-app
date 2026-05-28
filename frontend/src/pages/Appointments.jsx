@@ -8,6 +8,7 @@ import {
   getPatients
 } from '../api/index';
 import axios from 'axios';
+import useRole from '../hooks/useRole';
 
 function Appointments() {
   const [appointments, setAppointments] = useState([]);
@@ -18,11 +19,7 @@ function Appointments() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
-  // State pentru specializarea selectata in formular
-  // Cand se schimba, filtram doctorii din dropdown-ul de doctori
   const [selectedSpecialization, setSelectedSpecialization] = useState('');
-
   const [formData, setFormData] = useState({
     patient_id: '',
     doctor_id: '',
@@ -30,8 +27,11 @@ function Appointments() {
     appointment_time: '',
     duration_minutes: 30,
     reason: '',
-    status: 'pending'
+    status: 'pending',
+    notes: ''
   });
+
+  const { canManageAppointments, isDoctor } = useRole();
 
   useEffect(() => {
     fetchAll();
@@ -53,7 +53,6 @@ function Appointments() {
       setError(null);
     } catch (err) {
       setError('Eroare la incarcarea datelor!');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -61,13 +60,9 @@ function Appointments() {
 
   const handleAdd = () => {
     setFormData({
-      patient_id: '',
-      doctor_id: '',
-      appointment_date: '',
-      appointment_time: '',
-      duration_minutes: 30,
-      reason: '',
-      status: 'pending'
+      patient_id: '', doctor_id: '', appointment_date: '',
+      appointment_time: '', duration_minutes: 30, reason: '',
+      status: 'pending', notes: ''
     });
     setSelectedSpecialization('');
     setSelectedAppointment(null);
@@ -75,12 +70,13 @@ function Appointments() {
   };
 
   const handleEdit = (appointment) => {
-    // La editare, gasim specializarea doctorului ca sa preumplem dropdown-ul
     const doctor = doctors.find(
       d => d.first_name === appointment.doctor_first_name &&
            d.last_name === appointment.doctor_last_name
     );
 
+    // Doctorul vede doar campul notes in modal
+    // Ceilalti vad toate campurile
     setFormData({
       patient_id: patients.find(
         p => p.first_name === appointment.patient_first_name &&
@@ -88,15 +84,14 @@ function Appointments() {
       )?.id || '',
       doctor_id: doctor?.id || '',
       appointment_date: appointment.appointment_date
-        ? appointment.appointment_date.split('T')[0]
-        : '',
+        ? appointment.appointment_date.split('T')[0] : '',
       appointment_time: appointment.appointment_time || '',
       duration_minutes: appointment.duration_minutes || 30,
       reason: appointment.reason || '',
-      status: appointment.status || 'pending'
+      status: appointment.status || 'pending',
+      notes: appointment.notes || ''
     });
 
-    // Setam specializarea doctorului ca sa apara filtrat corect
     setSelectedSpecialization(doctor?.specialization_id || '');
     setSelectedAppointment(appointment);
     setShowModal(true);
@@ -116,15 +111,11 @@ function Appointments() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Cand se schimba specializarea, resetam doctorul selectat
-  // Nu are sens sa pastrezi un doctor daca ai schimbat specializarea
   const handleSpecializationChange = (e) => {
     setSelectedSpecialization(e.target.value);
     setFormData({ ...formData, doctor_id: '' });
   };
 
-  // Filtram doctorii dupa specializarea selectata
-  // Daca nu e selectata nicio specializare, aratam toti doctorii
   const filteredDoctors = selectedSpecialization
     ? doctors.filter(d => String(d.specialization_id) === String(selectedSpecialization))
     : doctors;
@@ -133,7 +124,11 @@ function Appointments() {
     e.preventDefault();
     try {
       if (selectedAppointment) {
-        await updateAppointment(selectedAppointment.id, formData);
+        // Doctorul trimite doar notes
+        const payload = isDoctor
+          ? { notes: formData.notes }
+          : formData;
+        await updateAppointment(selectedAppointment.id, payload);
       } else {
         await createAppointment(formData);
       }
@@ -161,8 +156,19 @@ function Appointments() {
     <div>
       <div className="page-header">
         <h1>Programari</h1>
-        <button className="btn btn-primary" onClick={handleAdd}>+ Adauga Programare</button>
+        {/* Doctorul nu poate adauga programari */}
+        {canManageAppointments && (
+          <button className="btn btn-primary" onClick={handleAdd}>
+            + Adauga Programare
+          </button>
+        )}
       </div>
+
+      {isDoctor && (
+        <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#e8f4fd', borderRadius: '4px', color: '#1a6fa3' }}>
+          Vizualizezi doar programarile tale. Poti adauga note la fiecare programare.
+        </div>
+      )}
 
       <div className="table-container">
         <table>
@@ -193,8 +199,22 @@ function Appointments() {
                   <td>{appointment.reason || '-'}</td>
                   <td>
                     <div className="actions">
-                      <button className="btn btn-warning" onClick={() => handleEdit(appointment)}>Editeaza</button>
-                      <button className="btn btn-danger" onClick={() => handleDelete(appointment.id)}>Anuleaza</button>
+                      {/* Doctorul poate doar adauga note — buton diferit */}
+                      <button
+                        className="btn btn-warning"
+                        onClick={() => handleEdit(appointment)}
+                      >
+                        {isDoctor ? 'Adauga nota' : 'Editeaza'}
+                      </button>
+                      {/* Doctorul nu poate anula programari */}
+                      {canManageAppointments && (
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleDelete(appointment.id)}
+                        >
+                          Anuleaza
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -207,81 +227,99 @@ function Appointments() {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
-            <h2>{selectedAppointment ? 'Editeaza Programare' : 'Adauga Programare'}</h2>
+            <h2>
+              {isDoctor
+                ? 'Adauga nota programare'
+                : selectedAppointment ? 'Editeaza Programare' : 'Adauga Programare'}
+            </h2>
             <form onSubmit={handleSubmit}>
 
-              <div className="form-group">
-                <label>Pacient</label>
-                <select name="patient_id" value={formData.patient_id} onChange={handleChange} required>
-                  <option value="">Selecteaza pacient...</option>
-                  {patients.map((patient) => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.first_name} {patient.last_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Dropdown specializare — filtreaza doctorii de mai jos */}
-              <div className="form-group">
-                <label>Specializare</label>
-                <select
-                  value={selectedSpecialization}
-                  onChange={handleSpecializationChange}
-                >
-                  <option value="">Toate specializarile</option>
-                  {specializations.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Dropdown doctori — filtrat dupa specializarea de sus */}
-              <div className="form-group">
-                <label>Doctor</label>
-                <select name="doctor_id" value={formData.doctor_id} onChange={handleChange} required>
-                  <option value="">Selecteaza doctor...</option>
-                  {filteredDoctors.map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      Dr. {doctor.first_name} {doctor.last_name}
-                      {!selectedSpecialization && doctor.specialization
-                        ? ` - ${doctor.specialization}`
-                        : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Data</label>
-                <input type="date" name="appointment_date" value={formData.appointment_date} onChange={handleChange} required />
-              </div>
-
-              <div className="form-group">
-                <label>Ora</label>
-                <input type="time" name="appointment_time" value={formData.appointment_time} onChange={handleChange} required />
-              </div>
-
-              <div className="form-group">
-                <label>Durata (minute)</label>
-                <input type="number" name="duration_minutes" value={formData.duration_minutes} onChange={handleChange} min="15" max="120" />
-              </div>
-
-              <div className="form-group">
-                <label>Motiv</label>
-                <textarea name="reason" value={formData.reason} onChange={handleChange} />
-              </div>
-
-              {selectedAppointment && (
+              {/* Doctorul vede doar campul notes */}
+              {isDoctor ? (
                 <div className="form-group">
-                  <label>Status</label>
-                  <select name="status" value={formData.status} onChange={handleChange}>
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="completed">Completed</option>
-                  </select>
+                  <label>Note</label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    rows={5}
+                    placeholder="Adauga note despre aceasta programare..."
+                  />
                 </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Pacient</label>
+                    <select name="patient_id" value={formData.patient_id} onChange={handleChange} required>
+                      <option value="">Selecteaza pacient...</option>
+                      {patients.map((patient) => (
+                        <option key={patient.id} value={patient.id}>
+                          {patient.first_name} {patient.last_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Specializare</label>
+                    <select value={selectedSpecialization} onChange={handleSpecializationChange}>
+                      <option value="">Toate specializarile</option>
+                      {specializations.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Doctor</label>
+                    <select name="doctor_id" value={formData.doctor_id} onChange={handleChange} required>
+                      <option value="">Selecteaza doctor...</option>
+                      {filteredDoctors.map((doctor) => (
+                        <option key={doctor.id} value={doctor.id}>
+                          Dr. {doctor.first_name} {doctor.last_name}
+                          {!selectedSpecialization && doctor.specialization ? ` - ${doctor.specialization}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Data</label>
+                    <input type="date" name="appointment_date" value={formData.appointment_date} onChange={handleChange} required />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Ora</label>
+                    <input type="time" name="appointment_time" value={formData.appointment_time} onChange={handleChange} required />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Durata (minute)</label>
+                    <input type="number" name="duration_minutes" value={formData.duration_minutes} onChange={handleChange} min="15" max="120" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Motiv</label>
+                    <textarea name="reason" value={formData.reason} onChange={handleChange} />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Note</label>
+                    <textarea name="notes" value={formData.notes} onChange={handleChange} />
+                  </div>
+
+                  {selectedAppointment && (
+                    <div className="form-group">
+                      <label>Status</label>
+                      <select name="status" value={formData.status} onChange={handleChange}>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="form-actions">

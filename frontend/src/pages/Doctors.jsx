@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getDoctors, createDoctor, updateDoctor, deleteDoctor } from '../api/index';
 import axios from 'axios';
+import useRole from '../hooks/useRole';
 
 function Doctors() {
   const [doctors, setDoctors] = useState([]);
@@ -17,6 +18,9 @@ function Doctors() {
     specialization_id: '',
     bio: ''
   });
+
+  // Obtinem permisiunile userului logat
+  const { canManageUsers } = useRole();
 
   useEffect(() => {
     fetchDoctors();
@@ -100,7 +104,12 @@ function Doctors() {
     <div>
       <div className="page-header">
         <h1>Doctori</h1>
-        <button className="btn btn-primary" onClick={handleAdd}>+ Adauga Doctor</button>
+        {/* Butonul de adaugare apare doar pentru superadmin si admin */}
+        {canManageUsers && (
+          <button className="btn btn-primary" onClick={handleAdd}>
+            + Adauga Doctor
+          </button>
+        )}
       </div>
 
       <div className="table-container">
@@ -112,12 +121,13 @@ function Doctors() {
               <th>Email</th>
               <th>Telefon</th>
               <th>Specializare</th>
-              <th>Actiuni</th>
+              {/* Coloana actiuni apare doar daca ai permisiuni */}
+              {canManageUsers && <th>Actiuni</th>}
             </tr>
           </thead>
           <tbody>
             {doctors.length === 0 ? (
-              <tr><td colSpan="6"><div className="empty">Nu exista doctori inregistrati.</div></td></tr>
+              <tr><td colSpan={canManageUsers ? 6 : 5}><div className="empty">Nu exista doctori inregistrati.</div></td></tr>
             ) : (
               doctors.map((doctor) => (
                 <tr key={doctor.id}>
@@ -126,12 +136,14 @@ function Doctors() {
                   <td>{doctor.email}</td>
                   <td>{doctor.phone || '-'}</td>
                   <td>{doctor.specialization || '-'}</td>
-                  <td>
-                    <div className="actions">
-                      <button className="btn btn-warning" onClick={() => handleEdit(doctor)}>Editeaza</button>
-                      <button className="btn btn-danger" onClick={() => handleDelete(doctor.id)}>Sterge</button>
-                    </div>
-                  </td>
+                  {canManageUsers && (
+                    <td>
+                      <div className="actions">
+                        <button className="btn btn-warning" onClick={() => handleEdit(doctor)}>Editeaza</button>
+                        <button className="btn btn-danger" onClick={() => handleDelete(doctor.id)}>Sterge</button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}
@@ -139,7 +151,7 @@ function Doctors() {
         </table>
       </div>
 
-      {showModal && (
+      {showModal && canManageUsers && (
         <div className="modal-overlay">
           <div className="modal">
             <h2>{selectedDoctor ? 'Editeaza Doctor' : 'Adauga Doctor'}</h2>
