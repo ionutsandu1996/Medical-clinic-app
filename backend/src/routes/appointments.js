@@ -1,7 +1,5 @@
-// Importam Router din Express
 const router = require('express').Router();
-
-// Importam controller-ul pentru programari
+const { authorize } = require('../middleware/roles');
 const {
   getAllAppointments,
   getAppointmentById,
@@ -10,19 +8,19 @@ const {
   deleteAppointment
 } = require('../controllers/appointmentsController');
 
-// GET /api/appointments - toate programarile
+// GET - toti pot vedea programarile
+// doctorii vad doar programarile lor (logica in controller)
 router.get('/', getAllAppointments);
-
-// GET /api/appointments/:id - o programare dupa ID
 router.get('/:id', getAppointmentById);
 
-// POST /api/appointments - creeaza programare noua
-router.post('/', createAppointment);
+// POST - superadmin, admin, staff pot crea programari
+router.post('/', authorize('superadmin', 'admin', 'staff'), createAppointment);
 
-// PUT /api/appointments/:id - actualizeaza programare
+// PUT - superadmin, admin, staff pot modifica
+// doctorii pot adauga doar note (logica in controller)
 router.put('/:id', updateAppointment);
 
-// DELETE /api/appointments/:id - anuleaza programare
-router.delete('/:id', deleteAppointment);
+// DELETE - doar superadmin, admin, staff
+router.delete('/:id', authorize('superadmin', 'admin', 'staff'), deleteAppointment);
 
 module.exports = router;

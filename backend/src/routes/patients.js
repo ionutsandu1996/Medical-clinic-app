@@ -1,7 +1,5 @@
-// Importam Router din Express
 const router = require('express').Router();
-
-// Importam controller-ul pentru pacienti
+const { authorize } = require('../middleware/roles');
 const {
   getAllPatients,
   getPatientById,
@@ -10,19 +8,14 @@ const {
   deletePatient
 } = require('../controllers/patientsController');
 
-// GET /api/patients - toti pacientii
+// GET - superadmin, admin, staff pot vedea toti pacientii
+// doctorii vad doar pacientii lor (logica in controller)
 router.get('/', getAllPatients);
-
-// GET /api/patients/:id - un pacient dupa ID
 router.get('/:id', getPatientById);
 
-// POST /api/patients - creeaza pacient nou
-router.post('/', createPatient);
-
-// PUT /api/patients/:id - actualizeaza pacient
-router.put('/:id', updatePatient);
-
-// DELETE /api/patients/:id - sterge pacient
-router.delete('/:id', deletePatient);
+// POST, PUT, DELETE - doar superadmin si admin
+router.post('/', authorize('superadmin', 'admin'), createPatient);
+router.put('/:id', authorize('superadmin', 'admin'), updatePatient);
+router.delete('/:id', authorize('superadmin', 'admin'), deletePatient);
 
 module.exports = router;

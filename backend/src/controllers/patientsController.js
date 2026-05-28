@@ -7,21 +7,23 @@ const pool = require('../config/db');
 // ========================
 const getAllPatients = async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT 
-        id,
-        first_name,
-        last_name,
-        email,
-        phone,
-        date_of_birth,
-        gender,
-        address,
-        emergency_contact,
-        created_at
-      FROM patients
-      ORDER BY last_name ASC
-    `);
+    let result;
+
+    if (req.user.role === 'doctor') {
+      // Doctorul vede doar pacientii care au programari cu el
+      result = await pool.query(`
+        SELECT DISTINCT p.*
+        FROM patients p
+        JOIN appointments a ON a.patient_id = p.id
+        WHERE a.doctor_id = $1
+        ORDER BY p.last_name ASC
+      `, [req.user.doctor_id]);
+    } else {
+      // Superadmin, admin, staff vad toti pacientii
+      result = await pool.query(
+        'SELECT * FROM patients ORDER BY last_name ASC'
+      );
+    }
 
     res.status(200).json({
       success: true,
@@ -30,10 +32,7 @@ const getAllPatients = async (req, res) => {
     });
   } catch (error) {
     console.error('Error getting patients:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

@@ -46,12 +46,13 @@ app.use(cors({
 
 
 const {authenticate} = require('./middleware/auth');
+const { authorize } = require('./middleware/roles');
  // ===============
 // Routes
 // ===============
 
 // Define the health check route -- used by Kubernetes for liveness/readiness probes
-// Health check - PUBLIC (Kubernetes are nevoie de el fara autentificare)
+// Health check - PUBLIC
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -60,16 +61,31 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Auth - PUBLIC (login nu necesita autentificare, evident)
+// Auth - PUBLIC
 app.use('/api/auth', require('./routes/auth'));
 
-// Toate rutele de mai jos necesita autentificare
-app.use('/api/doctors', authenticate, require('./routes/doctors'));
-app.use('/api/patients', authenticate, require('./routes/patients'));
-app.use('/api/appointments', authenticate, require('./routes/appointments'));
-app.use('/api/medical-records', authenticate, require('./routes/medicalRecords'));
+// Specializari - toti utilizatorii autentificati pot vedea
 app.use('/api/specializations', authenticate, require('./routes/specializations'));
 
+// Doctori - toti pot vedea, doar superadmin si admin pot modifica
+// Restrictia de READ vs CRUD o facem in controller
+app.use('/api/doctors', authenticate, require('./routes/doctors'));
+
+// Pacienti - superadmin, admin, staff pot vedea toti
+// doctorii vad doar pacientii lor (logica in controller)
+app.use('/api/patients', authenticate, require('./routes/patients'));
+
+// Programari - superadmin, admin, staff au CRUD
+// doctorii pot doar citi si adauga note
+app.use('/api/appointments', authenticate, require('./routes/appointments'));
+
+// Fise medicale - superadmin, admin au CRUD
+// staff poate doar citi
+// doctorii pot crea si adauga note la fisele lor
+app.use('/api/medical-records', authenticate, require('./routes/medicalRecords'));
+
+// Useri - doar superadmin si admin
+app.use('/api/users', authenticate, authorize('superadmin', 'admin'), require('./routes/users'));
 // ===============
 // Error handler
 // ===============

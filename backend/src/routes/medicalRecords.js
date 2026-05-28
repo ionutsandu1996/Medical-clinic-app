@@ -1,7 +1,5 @@
-// Importam Router din Express
 const router = require('express').Router();
-
-// Importam controller-ul pentru fise medicale
+const { authorize } = require('../middleware/roles');
 const {
   getPatientRecords,
   getRecordById,
@@ -9,16 +7,16 @@ const {
   updateRecord
 } = require('../controllers/medicalRecordsController');
 
-// GET /api/medical-records/patient/:patientId - fisele unui pacient
+// GET - toti pot vedea fisele medicale
+// doctorii vad doar fisele pacientilor lor (logica in controller)
 router.get('/patient/:patientId', getPatientRecords);
-
-// GET /api/medical-records/:id - o fisa dupa ID
 router.get('/:id', getRecordById);
 
-// POST /api/medical-records - creeaza fisa medicala
-router.post('/', createRecord);
+// POST - superadmin, admin, si doctorii pot crea fise medicale
+router.post('/', authorize('superadmin', 'admin', 'doctor'), createRecord);
 
-// PUT /api/medical-records/:id - actualizeaza fisa
+// PUT - superadmin, admin pot modifica orice
+// doctorii pot modifica doar notele din fisele lor (logica in controller)
 router.put('/:id', updateRecord);
 
 module.exports = router;

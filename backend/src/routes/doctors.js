@@ -1,7 +1,5 @@
-// Importam Router din Express pentru a defini rutele
 const router = require('express').Router();
-
-// Importam controller-ul pentru doctori
+const { authorize } = require('../middleware/roles');
 const {
   getAllDoctors,
   getDoctorById,
@@ -10,20 +8,13 @@ const {
   deleteDoctor
 } = require('../controllers/doctorsController');
 
-// GET /api/doctors - toti doctorii
+// GET - toti utilizatorii autentificati pot vedea doctori
 router.get('/', getAllDoctors);
-
-// GET /api/doctors/:id - un doctor dupa ID
 router.get('/:id', getDoctorById);
 
-// POST /api/doctors - creeaza doctor nou
-router.post('/', createDoctor);
+// POST, PUT, DELETE - doar superadmin si admin
+router.post('/', authorize('superadmin', 'admin'), createDoctor);
+router.put('/:id', authorize('superadmin', 'admin'), updateDoctor);
+router.delete('/:id', authorize('superadmin', 'admin'), deleteDoctor);
 
-// PUT /api/doctors/:id - actualizeaza doctor
-router.put('/:id', updateDoctor);
-
-// DELETE /api/doctors/:id - dezactiveaza doctor
-router.delete('/:id', deleteDoctor);
-
-// Exportam router-ul
 module.exports = router;
