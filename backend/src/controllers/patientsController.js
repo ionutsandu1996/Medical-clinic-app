@@ -44,39 +44,37 @@ const getPatientById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(`
-      SELECT 
-        id,
-        first_name,
-        last_name,
-        email,
-        phone,
-        date_of_birth,
-        gender,
-        address,
-        emergency_contact,
-        created_at
-      FROM patients
-      WHERE id = $1
-    `, [id]);
+    // Doctorul poate vedea doar pacientii lui
+    if (req.user.role === 'doctor') {
+      const check = await pool.query(`
+        SELECT DISTINCT p.*
+        FROM patients p
+        JOIN appointments a ON a.patient_id = p.id
+        WHERE p.id = $1 AND a.doctor_id = $2
+      `, [id, req.user.doctor_id]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: 'Patient not found'
-      });
+      if (check.rows.length === 0) {
+        return res.status(403).json({
+          success: false,
+          error: 'Nu ai acces la acest pacient.'
+        });
+      }
+
+      return res.status(200).json({ success: true, data: check.rows[0] });
     }
 
-    res.status(200).json({
-      success: true,
-      data: result.rows[0]
-    });
+    const result = await pool.query(
+      'SELECT * FROM patients WHERE id = $1', [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Patient not found' });
+    }
+
+    res.status(200).json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Error getting patient:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
