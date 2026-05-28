@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 import Doctors from './pages/Doctors';
 import Patients from './pages/Patients';
 import Appointments from './pages/Appointments';
@@ -28,8 +28,8 @@ function AppRoutes() {
 
   return (
     <BrowserRouter>
-      {/* Afisam Navbar doar daca esti autentificat */}
-      {user && <Navbar onLogout={logout} />}
+      {/* Afisam Sidebar doar daca esti autentificat */}
+      {user && <Sidebar onLogout={logout} />}
 
       <div className="container">
         <Routes>
