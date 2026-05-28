@@ -19,7 +19,7 @@ function Patients() {
     emergency_contact: ''
   });
 
-  const { canManageUsers, isDoctor } = useRole();
+  const { canManagePatients, isDoctor } = useRole();
 
   useEffect(() => {
     fetchPatients();
@@ -98,15 +98,13 @@ function Patients() {
     <div>
       <div className="page-header">
         <h1>Pacienti</h1>
-        {/* Doctorul vede doar pacientii lui, nu poate adauga */}
-        {canManageUsers && (
+        {canManagePatients && (
           <button className="btn btn-primary" onClick={handleAdd}>
             + Adauga Pacient
           </button>
         )}
       </div>
 
-      {/* Mesaj informativ pentru doctori */}
       {isDoctor && (
         <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#e8f4fd', borderRadius: '4px', color: '#1a6fa3' }}>
           Vizualizezi doar pacientii cu programari la tine.
@@ -123,12 +121,12 @@ function Patients() {
               <th>Telefon</th>
               <th>Data nasterii</th>
               <th>Gen</th>
-              {canManageUsers && <th>Actiuni</th>}
+              {canManagePatients && <th>Actiuni</th>}
             </tr>
           </thead>
           <tbody>
             {patients.length === 0 ? (
-              <tr><td colSpan={canManageUsers ? 7 : 6}><div className="empty">Nu exista pacienti inregistrati.</div></td></tr>
+              <tr><td colSpan={canManagePatients ? 7 : 6}><div className="empty">Nu exista pacienti inregistrati.</div></td></tr>
             ) : (
               patients.map((patient) => (
                 <tr key={patient.id}>
@@ -138,7 +136,7 @@ function Patients() {
                   <td>{patient.phone || '-'}</td>
                   <td>{patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString('ro-RO') : '-'}</td>
                   <td>{patient.gender || '-'}</td>
-                  {canManageUsers && (
+                  {canManagePatients && (
                     <td>
                       <div className="actions">
                         <button className="btn btn-warning" onClick={() => handleEdit(patient)}>Editeaza</button>
@@ -153,7 +151,7 @@ function Patients() {
         </table>
       </div>
 
-      {showModal && canManageUsers && (
+      {showModal && canManagePatients && (
         <div className="modal-overlay">
           <div className="modal">
             <h2>{selectedPatient ? 'Editeaza Pacient' : 'Adauga Pacient'}</h2>

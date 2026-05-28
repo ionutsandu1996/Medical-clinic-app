@@ -8,10 +8,13 @@ const useRole = () => {
   const isStaff = user?.role === 'staff';
   const isDoctor = user?.role === 'doctor';
 
-  // Poate face CRUD pe doctori si pacienti
+  // Pagina Users + doctori CRUD — doar superadmin si admin
   const canManageUsers = isSuperAdmin || isAdmin;
 
-  // Poate face CRUD pe programari
+  // Pacienti CRUD — superadmin, admin, staff
+  const canManagePatients = isSuperAdmin || isAdmin || isStaff;
+
+  // Programari CRUD — superadmin, admin, staff
   const canManageAppointments = isSuperAdmin || isAdmin || isStaff;
 
   // Poate crea fise medicale
@@ -27,6 +30,7 @@ const useRole = () => {
     isStaff,
     isDoctor,
     canManageUsers,
+    canManagePatients,
     canManageAppointments,
     canCreateMedicalRecords,
     canFullEditMedicalRecords
