@@ -139,7 +139,7 @@ body {
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 table {
@@ -480,5 +480,85 @@ tbody td {
   color: rgba(255,100,100,1);
 }
 
+
+/* ========================
+   Responsive
+======================== */
+
+/* Tabelele sa fie scrollabile pe orizontala pe ecrane mici */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* App main padding mai mic pe ecrane mici */
+@media (max-width: 768px) {
+  .app-main {
+    padding: 16px;
+  }
+
+  /* Sidebar collapsed automat pe mobil */
+  .sidebar-expanded {
+    width: 60px;
+    min-width: 60px;
+  }
+
+  .sidebar-brand,
+  .sidebar-user,
+  .sidebar-link span {
+    display: none;
+  }
+
+  /* Page header stacked pe mobil */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Modal full width pe mobil */
+  .modal {
+    width: 95%;
+    padding: 20px;
+    margin: 10px;
+  }
+
+  /* Butoane mai mici pe mobil */
+  .actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .actions .btn {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+
+  /* Font mai mic in tabele */
+  thead th {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  tbody td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main {
+    padding: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
 /* ========================
    Loading & Error
