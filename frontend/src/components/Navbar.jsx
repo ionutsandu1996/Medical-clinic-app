@@ -1,58 +1,62 @@
-// Importam NavLink din react-router-dom pentru navigare
-// NavLink adauga automat clasa 'active' pe link-ul curent
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Navbar() {
-  return (
-    // Elementul nav - bara de navigare principala
-    <nav className="navbar">
+  const { user, logout } = useAuth();
 
-      {/* Logo-ul aplicatiei */}
+  return (
+    <nav className="navbar">
       <div className="navbar-brand">
         🏥 Medical Clinic
       </div>
 
-      {/* Lista de link-uri de navigare */}
       <ul className="navbar-links">
-
-        {/* NavLink - adauga clasa 'active' automat pe pagina curenta */}
         <li>
-          <NavLink 
+          <NavLink
             to="/doctors"
             className={({ isActive }) => isActive ? 'active' : ''}
           >
             Doctori
           </NavLink>
         </li>
-
         <li>
-          <NavLink 
+          <NavLink
             to="/patients"
             className={({ isActive }) => isActive ? 'active' : ''}
           >
             Pacienti
           </NavLink>
         </li>
-
         <li>
-          <NavLink 
+          <NavLink
             to="/appointments"
             className={({ isActive }) => isActive ? 'active' : ''}
           >
             Programari
           </NavLink>
         </li>
-
         <li>
-          <NavLink 
+          <NavLink
             to="/medical-records"
             className={({ isActive }) => isActive ? 'active' : ''}
           >
             Fise Medicale
           </NavLink>
         </li>
-
       </ul>
+
+      {/* Informatii user logat + buton logout */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <span style={{ color: 'white', fontSize: '0.9rem' }}>
+          {user?.email} ({user?.role})
+        </span>
+        <button
+          className="btn btn-danger"
+          onClick={logout}
+        >
+          Logout
+        </button>
+      </div>
     </nav>
   );
 }
