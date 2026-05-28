@@ -6,6 +6,7 @@ import Patients from './pages/Patients';
 import Appointments from './pages/Appointments';
 import MedicalRecords from './pages/MedicalRecords';
 import Login from './pages/Login';
+import Users from './pages/Users';
 import './App.css';
 
 // Componenta care protejeaza rutele private
