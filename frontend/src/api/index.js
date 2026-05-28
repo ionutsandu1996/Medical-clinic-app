@@ -9,6 +9,15 @@ const api = axios.create({
   }
 });
 
+// Interceptor - add token at each request
+// Read token from localStorage at the request time
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 // ========================
 // DOCTORS
 // ========================
