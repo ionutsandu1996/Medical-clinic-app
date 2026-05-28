@@ -45,30 +45,30 @@ app.use(cors({
 
 
 
-
+const {authenticate} = require('./middleware/auth');
  // ===============
 // Routes
 // ===============
 
 // Define the health check route -- used by Kubernetes for liveness/readiness probes
-app.get('/health', (req,res) => {
-    res.status(200).json({
-        status: 'ok',
-
-        //timestamp
-        timestamp: new Date().toISOString(),
-
-        service: 'clinic-api'
-    });
+// Health check - PUBLIC (Kubernetes are nevoie de el fara autentificare)
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'clinic-api'
+  });
 });
 
-// API Routes 
-app.use('/api/doctors', require('./routes/doctors'));
-app.use('/api/patients', require('./routes/patients'));
-app.use('/api/appointments', require('./routes/appointments'));
-app.use('/api/medical-records', require('./routes/medicalRecords'));
-app.use('/api/specializations', require('./routes/specializations'));
+// Auth - PUBLIC (login nu necesita autentificare, evident)
 app.use('/api/auth', require('./routes/auth'));
+
+// Toate rutele de mai jos necesita autentificare
+app.use('/api/doctors', authenticate, require('./routes/doctors'));
+app.use('/api/patients', authenticate, require('./routes/patients'));
+app.use('/api/appointments', authenticate, require('./routes/appointments'));
+app.use('/api/medical-records', authenticate, require('./routes/medicalRecords'));
+app.use('/api/specializations', authenticate, require('./routes/specializations'));
 
 // ===============
 // Error handler
