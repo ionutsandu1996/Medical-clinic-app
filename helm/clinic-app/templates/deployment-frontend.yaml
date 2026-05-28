@@ -15,7 +15,7 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
-        checksum/deployment: {{ include (print $.Template.BasePath "/deployment-frontend.yaml") . | sha256sum }}
+        checksum/values: {{ toYaml .Values.backend | sha256sum }}
     spec:
       containers:
         - name: clinic-frontend
